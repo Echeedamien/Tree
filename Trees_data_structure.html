@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tree Data Structures Reference</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Define the custom, attractive color palette */
+        :root {
+            --color-primary: #06b6d4; /* Cyan-500: Vibrant Teal/Cyan */
+            --color-secondary: #334155; /* Slate-700: Dark contrast */
+            --color-background: #f0f9ff; /* Sky-50: Very light blue background */
+        }
+
+        /* Custom styles for the interactive layout */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-background);
+            color: #1e293b;
+        }
+
+           /* Styling for the Logo */
+        .logo {
+            height: 100px; /* Adjust height as needed */
+            width: auto;
+            border: none;          
+            box-shadow: none;
+            margin-bottom: 1rem;
+        }
+        /* Placement of the logo in the content wrapper */
+        .content-header {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 1rem;
+        }
+
+        /* Sidebar Styling */
+        #sidebar-menu {
+            background-color: var(--color-secondary);
+            color: white;
+            padding: 1rem;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2);
+            position: fixed; /* Fixed position for sidebar */
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 280px; /* Desktop width */
+            overflow-y: auto;
+            z-index: 20;
+        }
+
+        /* Main Content Area Styling */
+        #content-wrapper {
+            margin-left: 280px; /* Offset main content to make space for sidebar */
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        /* Mobile adjustments: Hide sidebar, show toggle button */
+        @media (max-width: 1024px) {
+            #sidebar-menu {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+                width: 100%;
+                height: 100%;
+                position: fixed;
+                padding-top: 5rem;
+            }
+            #sidebar-menu.open {
+                transform: translateX(0);
+            }
+            #content-wrapper {
+                margin-left: 0;
+            }
+            #menu-toggle {
+                display: block;
+            }
+        }
+
+        /* Hide content sections by default */
+        .content-section {
+            display: none;
+        }
+
+        /* Navigation Button Styles */
+        .nav-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s, color 0.2s;
+            margin-bottom: 0.5rem;
+        }
+        .nav-btn:hover {
+            background-color: #475569; /* Slate-600 */
+        }
+        .nav-btn.active {
+            background-color: var(--color-primary);
+            color: var(--color-secondary);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Shared Component Styles */
+        .code-block {
+            background-color: #1e293b;
+            color: #f8fafc;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.875rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .section-header {
+            color: var(--color-secondary);
+            border-bottom: 3px solid var(--color-primary);
+            padding-bottom: 0.5rem;
+        }
+        .data-card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+        .data-card:hover {
+            transform: translateY(-3px);
+        }
+        .img-placeholder {
+            border: 4px solid var(--color-primary); 
+            width: 100%;
+            height: auto;
+            max-width: 450px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .data-table th {
+            background-color: #e0f2f7;
+            color: var(--color-secondary);
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#06b6d4',
+                        secondary: '#334155',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Mobile Menu Toggle Button -->
+    <button id="menu-toggle" class="lg:hidden fixed top-4 left-4 p-3 bg-primary text-secondary rounded-lg shadow-xl z-30 transition-all" style="display: none;">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+
+    <!-- Sidebar Menu (Navigation) -->
+    <aside id="sidebar-menu" class="hidden lg:block">
+        <div class="p-6">
+            <h2 class="text-3xl font-extrabold text-primary-300 tracking-wider mb-6">Tree Topics</h2>
+            <nav id="nav-links">
+                <!-- Navigation links using data-section attribute -->
+                <a href="#" class="nav-btn active" data-section="section-intro">1. Introduction to Trees</a>
+                <a href="#" class="nav-btn" data-section="section-terms">2. Terminology Used in Trees</a>
+                <a href="#" class="nav-btn" data-section="section-types">3. Types of Trees</a>
+                <a href="#" class="nav-btn" data-section="section-traversals">4. Binary Tree Traversals</a>
+                <a href="#" class="nav-btn" data-section="section-code">5. Complete C Code Implementation</a>
+            </nav>
+        </div>
+        <!-- Footer in Sidebar -->
+        <div class="absolute bottom-0 w-full p-4 border-t border-slate-600 text-center text-sm">
+            <p class="text-primary-300">&copy; 2025 Data Structures</p>
+            <p>Created by Group 4 | Data Structures Project | ESTAM University</p>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div id="content-wrapper">
+        <header class="block lg:hidden mb-8 p-4 bg-secondary text-white rounded-xl shadow-lg">
+            <h1 class="text-3xl font-extrabold tracking-wider"> Tree in Data Structures and Algorithms</h1>
+            <p>Presented by Group 4 | ESTAM University, Benin Republic</p>
+        </header>
+
+        <!-- Logo Header in Content Area (Top Right) -->
+        <div class="content-header">
+             <img src="estam_logo.png" alt="ESTAM Logo" class="logo">
+        </div>
+        
+        <main class="max-w-4xl mx-auto lg:mx-0">
+            
+            <!-- Section 1: Introduction -->
+            <section id="section-intro" class="content-section">
+                <h2 class="text-3xl sm:text-4xl font-extrabold section-header mb-8">1. Introduction to Trees</h2>
+                <img class="mx-auto rounded-lg img-placeholder" src="tree_image_1.png" alt="Diagram illustrating the root, parent, child, and leaf nodes.">
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="data-card">
+                        <h3 class="text-2xl font-bold text-primary mb-3">What is a Tree?</h3>
+                        <p class="text-gray-600">A tree is a widely used data structure that simulates a hierarchical tree structure, with a root value and subtrees as children, represented as a set of linked nodes. It's the foundation for organized data access.</p>
+                    </div>
+                    <div class="data-card">
+                        <h3 class="text-2xl font-bold text-primary mb-3">Key Advantages</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li>Moderate Access/Search: Faster than a Linked List (especially BSTs).</li>
+                            <li>Moderate Insertion/Deletion: Faster than static Arrays.</li>
+                        </ul>
+                    </div>
+                    <div class="data-card">
+                        <h3 class="text-2xl font-bold text-primary mb-3">Real-World Uses</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li>File System Structure (directories/subdirectories).</li>
+                            <li>DOM Structure (HTML page rendering).</li>
+                            <li>Router Algorithms (efficient path finding).</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: Terminology -->
+            <section id="section-terms" class="content-section">
+                <h2 class="text-3xl sm:text-4xl font-extrabold section-header mb-8">2. Terminology Used in Trees</h2>
+
+                <div class="data-card overflow-x-auto mb-8">
+                    <table class="w-full data-table min-w-[600px]">
+                        <thead>
+                            <tr>
+                                <th class="rounded-tl-lg">Term</th>
+                                <th class="rounded-tr-lg">Definition</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Root Node</td><td>The first node in a tree.</td></tr>
+                            <tr><td>Parent Node</td><td>The predecessor of any node.</td></tr>
+                            <tr><td>Child Node</td><td>The descendant of any node.</td></tr>
+                            <tr><td>Leaf Node</td><td>A node that does not have a child. (External Node).</td></tr>
+                            <tr><td>Internal Node</td><td>A node which has at least one child.</td></tr>
+                            <tr><td>Depth</td><td>The number of edges from the Root Node to a specific node.</td></tr>
+                            <tr><td>Height</td><td>The number of edges on the longest path from a node down to a leaf.</td></tr>
+                            <tr><td>Degree</td><td>The total number of children of a node.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Section 3: Types of Trees -->
+            <section id="section-types" class="content-section">
+                <h2 class="text-3xl sm:text-4xl font-extrabold section-header mb-8">3. Types of Trees</h2>
+
+                <!-- Binary Tree -->
+                <div class="data-card mb-8">
+                    <h3 class="text-2xl font-bold text-primary mb-4 border-b pb-2 border-gray-100">A. Binary Tree</h3>
+                    <p class="text-gray-600 mb-4">A special type of tree in which every node can have a maximum of 2 children: the left child and the right child.</p>
+
+                    <!-- Image 2: Diagram of a Binary Tree example. -->
+                    <img class="mx-auto rounded-lg img-placeholder my-4" src="tree_image_2.png" alt="Diagram of a Binary Tree.">
+
+                    <h4 class="text-xl font-semibold text-secondary mt-4 mb-3">Representation & Sub-Types:</h4>
+                    <div class="flex flex-wrap gap-3 mb-4">
+                        <span class="bg-primary/20 text-secondary text-sm font-medium px-4 py-1 rounded-full shadow-md">Array Representation</span>
+                        <span class="bg-primary/20 text-secondary text-sm font-medium px-4 py-1 rounded-full shadow-md">Linked List Representation</span>
+                        <span class="bg-primary/20 text-secondary text-sm font-medium px-4 py-1 rounded-full shadow-md">Strictly Binary Tree</span>
+                        <span class="bg-primary/20 text-secondary text-sm font-medium px-4 py-1 rounded-full shadow-md">Complete Binary Tree</span>
+                        <span class="bg-primary/20 text-secondary text-sm font-medium px-4 py-1 rounded-full shadow-md">Extended Binary Tree</span>
+                    </div>
+                    <!-- Image 3: Diagram showing Binary Tree mapping to an Array. -->
+                    <img class="mx-auto rounded-lg img-placeholder my-4" src="tree_image_3.png" alt="Diagram showing Binary Tree mapping to an Array.">
+
+                    <h4 class="text-xl font-semibold text-secondary mt-4 mb-3">Threaded Binary Tree:</h4>
+                    <p class="text-gray-600 mb-4">A binary tree where null left child pointers point to its in-order predecessor, and null right child pointers point to its in-order successor.</p>
+                    <!-- Image 4: Threaded Binary Tree Diagram -->
+                    <img class="mx-auto rounded-lg img-placeholder my-4" src="tree_image_4.png" alt="Diagram of a Threaded Binary Tree.">
+                </div>
+
+                <!-- Binary Search Tree (BST) -->
+                <div class="data-card mb-8">
+                    <h3 class="text-2xl font-bold text-primary mb-4 border-b pb-2 border-gray-100">B. Binary Search Tree (BST)</h3>
+                    <p class="text-gray-600 mb-4">A Binary Tree that satisfies the binary search property: left child value &lt; parent value &lt; right child value.</p>
+
+                    <!-- Image 5: Diagram of a Binary Search Tree (BST) example. -->
+                    <img class="mx-auto rounded-lg img-placeholder my-4" src="tree_image_5.png" alt="Diagram of a Binary Search Tree (BST).">
+
+                    <h4 class="text-xl font-semibold text-secondary mt-4 mb-3">Operations Summary:</h4>
+                    <ul class="list-disc list-inside space-y-1 text-gray-700">
+                        <li>Searching: Fast, by following the left/right rules recursively.</li>
+                        <li>Insertion: Insert new node at the proper leaf position.</li>
+                        <li>Deletion: Requires special handling for nodes with two children (using the in-order successor).</li>
+                    </ul>
+                </div>
+
+                <!-- Multiway & AVL Trees Grid -->
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="data-card">
+                        <h3 class="text-2xl font-bold text-primary mb-4 border-b pb-2 border-gray-100">C. Multiway Search Trees</h3>
+                        <p class="text-gray-600 mb-4">Can have $m-1$ values per node and $m$ children (where $m$ is the order).</p>
+
+                        <h4 class="text-xl font-semibold text-secondary mb-2">B-Trees</h4>
+                        <ul class="list-disc list-inside space-y-1 text-gray-700 mb-4">
+                            <li>Specialized $M$-way tree for disk access. Designed for $O(\log n)$ performance.</li>
+                        </ul>
+                        <!-- Image 6: Diagram of a B-Tree of order 5. -->
+                        <img class="mx-auto rounded-lg img-placeholder mb-4" src="tree_image_6.png" alt="Diagram of a B-Tree of order 5.">
+
+                        <h4 class="text-xl font-semibold text-secondary mb-2">B+ Trees</h4>
+                        <ul class="list-disc list-inside space-y-1 text-gray-700 mb-4">
+                            <li>Internal nodes only contain keys; all records are stored at the leaf level. Ideal for file management.</li>
+                        </ul>
+                        <!-- Image 7: Diagram of a B+ Tree. -->
+                        <img class="mx-auto rounded-lg img-placeholder" src="tree_image_7.png" alt="Diagram of a B+ Tree.">
+                    </div>
+
+                    <div class="data-card">
+                        <h3 class="text-2xl font-bold text-primary mb-4 border-b pb-2 border-gray-100">D. AVL Tree (Self-Balancing)</h3>
+                        <p class="text-gray-600 mb-4">A self-balancing BST where the Balance Factor (height difference between subtrees) must be restricted to $\{-1, 0, +1\}$.</p>
+
+                        <h4 class="text-xl font-semibold text-secondary mb-2">Rebalancing</h4>
+                        <p class="text-gray-700 mb-4">Achieved through rotations (LL, RR, LR, RL) when the balance factor is violated, preserving order and balance.</p>
+                        <!-- Image 8: Diagram of an AVL Tree showing balance factors. -->
+                        <img class="mx-auto rounded-lg img-placeholder" src="tree_image_8.png" alt="Diagram of an AVL Tree showing balance factors.">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 4: Traversal Methods -->
+            <section id="section-traversals" class="content-section">
+                <h2 class="text-3xl sm:text-4xl font-extrabold section-header mb-8">4. Binary Tree Traversals</h2>
+                <p class="text-gray-600 mb-8">The three main methods define the order in which the Root, Left child, and Right child are visited.</p>
+
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Inorder -->
+                    <div class="data-card bg-primary/10">
+                        <h3 class="text-2xl font-bold text-primary mb-3">1. Inorder</h3>
+                        <p class="font-bold text-secondary mb-3">Order: [Left - Root - Right]</p>
+                        <p class="text-sm text-gray-700 mb-4">Use: Retrieves elements in sorted order from a BST.</p>
+                        <div class="code-block mb-4">
+                            <pre><code>void inorder_traversal(struct node* root) {
+    if (root != NULL) {
+        inorder_traversal(root->left);
+        printf("%d ", root->data);
+        inorder_traversal(root->right);
+    }
+}</code></pre>
+                        </div>
+                        <!-- Image 9: Visualization of Inorder Traversal. -->
+                        <img class="mx-auto rounded-lg img-placeholder" src="tree_image_9.png" alt="Visualization of Inorder Traversal.">
+                    </div>
+
+                    <!-- Preorder -->
+                    <div class="data-card bg-primary/10">
+                        <h3 class="text-2xl font-bold text-primary mb-3">2. Preorder</h3>
+                        <p class="font-bold text-secondary mb-3">Order: [Root - Left - Right]</p>
+                        <p class="text-sm text-gray-700 mb-4">Use: Useful for creating a complete copy of the tree structure.</p>
+                        <div class="code-block mb-4">
+                            <pre><code>void preorder_traversal(struct node* root) {
+    if (root != NULL) {
+        printf("%d ", root->data);
+        preorder_traversal(root->left);
+        preorder_traversal(root->right);
+    }
+}</code></pre>
+                        </div>
+                        <!-- Image 10: Visualization of Preorder Traversal. -->
+                        <img class="mx-auto rounded-lg img-placeholder" src="tree_image_10.png" alt="Visualization of Preorder Traversal.">
+                    </div>
+
+                    <!-- Postorder -->
+                    <div class="data-card bg-primary/10">
+                        <h3 class="text-2xl font-bold text-primary mb-3">3. Postorder</h3>
+                        <p class="font-bold text-secondary mb-3">Order: [Ledt - Right - Root]</p>
+                        <p class="text-sm text-gray-700 mb-4">Use: Often used for deleting a tree from bottom-up.</p>
+                        <div class="code-block mb-4">
+                            <pre><code>void postorder_traversal(struct node* root) {
+    if(root != NULL) {
+        postorder_traversal(root->left);
+        postorder_traversal(root->right);
+        printf("%d ", root->data);
+    }
+}</code></pre>
+                        </div>
+                        <!-- Image 11: Visualization of Postorder Traversal. -->
+                        <img class="mx-auto rounded-lg img-placeholder" src="tree_image_11.png" alt="Visualization of Postorder Traversal.">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 5: Full Code -->
+            <section id="section-code" class="content-section">
+                <h2 class="text-3xl sm:text-4xl font-extrabold section-header mb-8">5. Complete C Code Implementation (BST)</h2>
+                <p class="text-gray-600 mb-4">Full, runnable code for Binary Search Tree creation, insertion, and inorder traversal, demonstrating core operations.</p>
+
+                <div class="code-block">
+                    <pre><code>#include &lt;stdio.h>
+#include &lt;stdlib.h>
+
+// Define the structure for a tree node
+struct node
+{
+    int data;
+    struct node* left;
+    struct node* right;
+};
+
+// Function to create a new node
+struct node* createNode(int value) {
+    // Allocate memory for the new node
+    struct node* newNode = (struct node*)malloc(sizeof(struct node)); 
+    newNode->data = value;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+// Function to insert a new node into the BST
+struct node* insert(struct node* root, int data)
+{
+    // If the tree is empty, return a new node
+    if (root == NULL)
+        return createNode(data);
+
+    // Otherwise, recur down the tree
+    if (data &lt; root->data)
+        root->left = insert(root->left, data);
+    else if (data > root->data)
+        root->right = insert(root->right, data);
+
+    // Return the (unchanged) node pointer
+    return root;
+}
+
+// Function for Inorder Traversal (Left -> Root -> Right)
+// Prints nodes in ascending (sorted) order.
+void inorder(struct node* root){
+    if (root != NULL) {
+        inorder(root->left);
+        printf("%d -> ", root->data);
+        inorder(root->right);
+    }
+}
+
+// Driver program example
+int main(){
+    struct node *root = NULL;
+
+    // Build the tree 
+    root = insert(root, 8);
+    insert(root, 4);
+    insert(root, 6);
+    insert(root, 3);
+    insert(root, 32);
+    insert(root, 13);
+    insert(root, 16);
+    insert(root, 2);
+
+    printf("BST Inorder Traversal (Sorted order of nodes):\n");
+    inorder(root);
+    printf("NULL\n");
+
+    return 0;
+}</code></pre>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navLinks = document.querySelectorAll('#nav-links .nav-btn');
+            const sections = document.querySelectorAll('.content-section');
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar-menu');
+
+            // --- Core Logic ---
+            const showSection = (sectionId) => {
+                // Hide all sections
+                sections.forEach(section => {
+                    section.style.display = 'none';
+                });
+
+                // Show the selected section
+                const targetSection = document.getElementById(sectionId);
+                if (targetSection) {
+                    targetSection.style.display = 'block';
+                }
+
+                // Update active link state
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('data-section') === sectionId) {
+                        link.classList.add('active');
+                    }
+                });
+                
+                // Hide menu on mobile after click
+                if (window.innerWidth <= 1024) {
+                    sidebar.classList.remove('open');
+                }
+            };
+
+            // --- Event Listeners ---
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const sectionId = e.target.getAttribute('data-section');
+                    showSection(sectionId);
+                });
+            });
+
+            // Toggle sidebar for mobile
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+            });
+
+            // --- Initial Load ---
+            // Show the first section on page load
+            showSection('section-intro');
+            
+            // Show the mobile toggle button once the script runs
+            menuToggle.style.display = 'block';
+        });
+    </script>
+</body>
+</html>
